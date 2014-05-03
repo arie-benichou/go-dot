@@ -1,0 +1,25 @@
+------------------------------------
+
+Evaluation: poser des tests
+	Pour le game over:
+	val debug = Array(
+	    "OX.",
+	    "OOO",
+	    "OX."
+	  )
+
+Ordonner les options !
+
+Filtrer les options ?
+
+helpers
+
+abstractions
+
+portage blokus
+
+web ui refactoring
+
+clustering
+
+------------------------------------
