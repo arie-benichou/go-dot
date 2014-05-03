@@ -17,9 +17,14 @@ import abstractions.MoveSupplier
 
 object Game {
 
-  val Board02X02 = Array(
-    "..",
-    ".."
+  val debug = Array(
+    "...XO.X",
+    "...XOO.",
+    "....XOO",
+    ".....XO",
+    ".......",
+    ".......",
+    "......."
   )
 
   type GoContext = Context[Char, Int, Board, Position]
@@ -80,10 +85,10 @@ object Game {
   }
 
   private val sides = Sides(
-    Adversity('O', 'X'),
+    Adversity('X', 'O'),
     List(
-      Side('O', 0, GoMoveSupplier2(0)),
-      Side('X', 0, GoMoveSupplier2(3))
+      Side('X', 0, GoMoveSupplier2(2)),
+      Side('O', 0, GoMoveSupplier2(2))
     )
   )
 
@@ -134,7 +139,7 @@ object Game {
   }
 
   val context: GoContext = Context(
-    sides.first, sides, Board(3),
+    sides.first, sides, Board(5, 7),
     null, Stack(), Set(),
     isTerminalFunction,
     applicationFunction,

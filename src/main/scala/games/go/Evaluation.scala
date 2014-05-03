@@ -51,20 +51,26 @@ object Evaluation {
       else estimate(context, context.lastMove.side)
     }
 
+  def opp(newContext: GoContext, depth: Int, ls: List[abstractions.Move[Char, Position]], α: Long, β: Long): Long = {
+    if (ls.isEmpty || β <= α) β
+    else opp(newContext, depth, ls.tail, α, Math.min(β, -apply2(newContext(ls.head), depth - 1, -β, -α)))
+  }
+
   // TODO extract to Exploration Object
-  private def apply2(newContext: GoContext, depth: Int): Long = {
+  private def apply2(newContext: GoContext, depth: Int, α: Long, β: Long): Long = {
     if (depth < 1 || newContext.isTerminal) f(newContext)
     else {
       val legalMoves = newContext.options.toList
       val sortedLegalMoves = legalMoves.sortBy(_.data)
-      sortedLegalMoves.foldLeft(Long.MaxValue) { (min, opponentMove) =>
-        Math.min(min, -apply2(newContext(opponentMove), depth - 1))
-      }
+      //      sortedLegalMoves.foldLeft(Long.MaxValue) { (min, opponentMove) =>
+      //        Math.min(min, -apply2(newContext(opponentMove), depth - 1))
+      //      }
+      opp(newContext, depth, sortedLegalMoves, α, β)
     }
   }
 
   def apply(context: GoContext, move: abstractions.Move[Char, Position], maxDepth: Int): Long =
-    apply2(context(move), maxDepth)
+    apply2(context(move), maxDepth, failure, success)
 
   def main(args: Array[String]) {
     Main.main(args)
