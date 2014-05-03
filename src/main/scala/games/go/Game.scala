@@ -82,8 +82,8 @@ object Game {
   private val sides = Sides(
     Adversity('O', 'X'),
     List(
-      Side('O', 0, GoMoveSupplier2(3)),
-      Side('X', 0, GoMoveSupplier2(0))
+      Side('O', 0, GoMoveSupplier2(0)),
+      Side('X', 0, GoMoveSupplier2(3))
     )
   )
 
@@ -131,10 +131,6 @@ object Game {
 
   def main(args: Array[String]) {
     Main.main(args)
-  }
-
-  def captures(context: GoContext, side: Char) = {
-    context.side(side).values
   }
 
   val context: GoContext = Context(
