@@ -14,6 +14,9 @@ import scala.annotation.tailrec
 import scala.util.Random
 import scala.collection.immutable.Stack
 import abstractions.MoveSupplier
+import abstractions.ContextTrait
+import abstractions.ContextTrait
+import abstractions.Exploration
 
 object Game {
 
@@ -35,6 +38,8 @@ object Game {
 
   val NullOption = Position(Integer.MAX_VALUE, Integer.MAX_VALUE)
 
+  val ai = Exploration(Evaluation)
+
   private def evaluateOptions(context: GoContext, depth: Int) = {
     val tmp = collection.mutable.Map[Long, Set[abstractions.Move[Char, Position]]]().withDefaultValue(Set())
     val legalMoves = context.options.toList
@@ -46,7 +51,8 @@ object Game {
       println("==============================================")
       sortedLegalMoves.foreach { move =>
         i += 1
-        val key = Evaluation(context, move, depth)
+        val ctx: ContextTrait[abstractions.Move[_, _]] = context.apply(move).asInstanceOf[ContextTrait[abstractions.Move[_, _]]]
+        val key = ai(ctx, depth)
         println(i + "/" + n + " : " + move + " : " + key)
         tmp.update(key, tmp(key) + move)
       }
@@ -85,10 +91,10 @@ object Game {
   }
 
   private val sides = Sides(
-    Adversity('X', 'O'),
+    Adversity('O', 'X'),
     List(
-      Side('X', 0, GoMoveSupplier2(2)),
-      Side('O', 0, GoMoveSupplier2(2))
+      Side('O', 0, GoMoveSupplier2(2)),
+      Side('X', 0, GoMoveSupplier2(5))
     )
   )
 
@@ -139,11 +145,19 @@ object Game {
   }
 
   val context: GoContext = Context(
-    sides.first, sides, Board(5, 7),
+    sides.first, sides, Board(3, 4),
     null, Stack(), Set(),
     isTerminalFunction,
     applicationFunction,
     optionsFunction
   )
+
+  /*
+  sealed case class MyGoContext(ctx: GoContext) extends ContextTrait[GoMove] {
+    def apply(move: GoMove) = MyGoContext(ctx.apply(move))
+    def isTerminal: Boolean = true
+    def options = Stream[GoMove]()
+  }
+  */
 
 }
