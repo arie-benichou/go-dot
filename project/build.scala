@@ -9,7 +9,7 @@ object MyScalatraWebAppBuild extends Build {
   val Organization = "com.github.artefact"
   val Name = "My Scalatra Web App"
   val Version = "0.1.0-SNAPSHOT"
-  val ScalaVersion = "2.10.2"
+  val ScalaVersion = "2.10.4"
   val ScalatraVersion = "2.2.1"
 
   lazy val project = Project (

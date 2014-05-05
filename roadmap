@@ -1,5 +1,7 @@
 ------------------------------------
 
+Amélioration du score possible
+
 Evaluation: poser des tests
 	Pour le game over:
 	val debug = Array(
@@ -11,10 +13,6 @@ Evaluation: poser des tests
 Ordonner les options !
 
 Filtrer les options ?
-
-helpers
-
-abstractions
 
 web ui refactoring
 

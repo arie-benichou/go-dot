@@ -2,6 +2,7 @@ package abstractions
 
 object Sides {
 
+  // TODO vérifier la liste
   def apply[A, B, C](adversity: Adversity[A], sides: List[Side[A, B, C]]): Sides[A, B, C] =
     new Sides(adversity, (adversity.ids zip sides).toMap)
 

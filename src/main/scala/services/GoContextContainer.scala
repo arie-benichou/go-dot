@@ -8,8 +8,9 @@ import org.scalatra.json.JacksonJsonSupport
 import components.Positions.Position
 import games.go.Game
 import games.go.Game._
-
+/*
 import GoContextContainer._
+
 
 object GoContextContainer {
 
@@ -21,10 +22,10 @@ object GoContextContainer {
         val data = tail.split(':').map(Integer.parseInt)
         Position(data(0), data(1))
       }
-    GoMove(side, position)
+    MyGoMove(side, position)
   }
 
-  private def moveToString(move: abstractions.Move[Char, Position]) = if (move == null) "" else move.side.toString().charAt(0) + move.data.row + ":" + move.data.column
+  private def moveToString(move: GoMove) = if (move == null) "" else move.side.toString().charAt(0) + move.data.row + ":" + move.data.column
 
   private def pathToString(ctx: GoContext) = {
     val stack = ctx.history.map { ctx => moveToString(ctx.lastMove) }
@@ -108,7 +109,8 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
     val ctx = context;
     try {
       if (!ctx.history.isEmpty) this.synchronized {
-        context = ctx.history.head
+        //context = ctx.history.head
+        null
       }
     }
     catch {
@@ -131,3 +133,4 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
   }
 
 }
+  */ 

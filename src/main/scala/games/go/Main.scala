@@ -18,8 +18,6 @@ object Main {
     if (context.history.isEmpty) {
       println
       println("New Game")
-      println
-      println("==============================================")
     }
     else {
       val lastMove =

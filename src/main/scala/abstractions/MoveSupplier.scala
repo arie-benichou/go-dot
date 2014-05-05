@@ -1,7 +1,7 @@
 package abstractions
 
-trait MoveSupplier[A, B] {
+trait MoveSupplier[A, D] {
 
-  def apply(context: Context[A, _, _, B]): Move[A, B]
+  def apply(context: AbstractContext[A, _, _, D]): Move[A, D]
 
 }

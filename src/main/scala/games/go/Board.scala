@@ -129,41 +129,30 @@ object Board {
     def apply(data: Array[String]): String = toString(data)
   }
 
-  //  private def reduce(board: Board) = {
-  //    val positions = board.spaces.foldLeft(Set[Position]()) { (s, p) =>
-  //      val neighbours = (p * Directions.AllAround).filter(board.cells.get(_) != Undefined)
-  //      if (neighbours.count(board.cells.get(_) == Space) != neighbours.size) s + p else s
-  //    }
-  //    if (positions.isEmpty) board.spaces else positions
-  //  }
-
   private def opponent(character: Char) = if (character == Black) White else Black
 
-  private def update(board: Board, position: Position, character: Char) = {
-    val capturedPositions = board.layer(opponent(character)).strings.filter(_.out == Set(position)).flatMap(s => s.in)
-    board.copy(board.cells.apply(capturedPositions.foldLeft(Map(position -> character))((map, p) => map + (p -> Space))))
+  def apply(rows: Int, columns: Int): Board = {
+    Board(Cells((Positions.from(Origin).to((rows - 1, columns - 1)))(Space), Space, Undefined), rows, columns)(0)
   }
 
   def apply(data: Array[String]): Board = {
-    val (cells, rows, columns) = Parser(data)
-    Board(cells, rows, columns)
+    val (cells, rows, columns) = Parser(data) // TODO prendre en compte les captures ?
+    Board(cells, rows, columns)(0)
   }
 
-  def apply(n: Int): Board = {
-    Board(Cells((Positions.from(Origin).to((n - 1, n - 1)))(Space), Space, Undefined), n, n)
-  }
-
-  def apply(rows: Int, columns: Int): Board = {
-    Board(Cells((Positions.from(Origin).to((rows - 1, columns - 1)))(Space), Space, Undefined), rows, columns)
-  }
+  def apply(n: Int): Board = apply(n, n)
 
 }
 
-sealed case class Board(cells: Cells[Char], rows: Int, columns: Int) {
+sealed case class Board(cells: Cells[Char], rows: Int, columns: Int)(val captured: Int) {
   lazy val spaces = this.cells.filterDefaults()
   private lazy val layers: Map[Char, Layer] = Layers(this)
   def layer(character: Char) = this.layers(character)
   lazy val asArrayOfString = ToString(this.cells)
   override def toString = ToString(this.asArrayOfString)
-  def play(position: Position, character: Char) = update(this, position, character)
+  def play(position: Position, character: Char) = {
+    val captures = this.layer(opponent(character)).strings.filter(_.out == Set(position)).flatMap(s => s.in)
+    val updatedCells = this.cells.apply(captures.foldLeft(Map(position -> character))((map, p) => map + (p -> Space)))
+    Board(updatedCells, rows, columns)(captures.size)
+  }
 }
