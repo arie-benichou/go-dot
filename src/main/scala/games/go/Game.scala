@@ -25,67 +25,6 @@ object Game {
 
   val NullOption = Position(Integer.MAX_VALUE, Integer.MAX_VALUE)
 
-  private val ai = Exploration(Evaluation)
-
-  private def evaluateOptions(context: GoContext, depth: Int) = {
-    val tmp = collection.mutable.Map[Long, Set[GoMove]]().withDefaultValue(Set())
-    val legalMoves = context.options.toList
-    val sortedLegalMoves = legalMoves.sortBy(_.data)
-    val n = sortedLegalMoves.size
-    if (n == 1) Map(0L -> legalMoves)
-    else {
-      var i = 0
-      //      println("==============================================")
-      sortedLegalMoves.foreach { move =>
-        i += 1
-        val key = ai(context.apply(move), depth)
-        //        println(i + "/" + n + " : " + move + " : " + key)
-        tmp.update(key, tmp(key) + move)
-      }
-      val tmap = TreeMap[Long, Set[GoMove]]()(math.Ordering.Long.reverse) ++ tmp
-      tmap
-    }
-  }
-
-  private sealed case class GoMoveSupplier1 extends MoveSupplier[Char, Position] {
-    def apply(context: AbstractContext[Char, _, _, Position]) = {
-      val legalMoves = context.options.toList
-      var move = legalMoves(Random.nextInt(legalMoves.size))
-      while (legalMoves.size > 1 && isNullMove(move)) {
-        move = legalMoves(Random.nextInt(legalMoves.size))
-      }
-      move
-    }
-  }
-
-  private sealed case class GoMoveSupplier2(depth: Int) extends MoveSupplier[Char, Position] {
-    def apply(context: AbstractContext[Char, _, _, Position]) = {
-      val map = evaluateOptions(context.asInstanceOf[GoContext], depth)
-      val (kills, other) = map.keySet.partition(_ >= Evaluation.Success)
-      if (!kills.isEmpty) {
-        val positives = other.filter(_ > 0)
-        if (!positives.isEmpty) map(positives.toList.sorted(math.Ordering.Long.reverse).head).iterator.next
-        else map.head._2.iterator.next
-      }
-      else {
-        map.head._2.iterator.next
-      }
-    }
-  }
-
-  private sealed case class GoMoveSupplier3 extends MoveSupplier[Char, Position] {
-    def apply(context: AbstractContext[Char, _, _, Position]) = {
-      val legalMoves = context.options.toList
-      val sortedLegalMoves = legalMoves.sortBy(_.data)
-      sortedLegalMoves.head
-    }
-  }
-
-  private val sides = Sides(Adversity('O', 'X'), List(
-    Side('O', 0, GoMoveSupplier2(0)),
-    Side('X', 0, GoMoveSupplier2(2))
-  ))
-
   private def isNullMove(move: GoMove) = move.data == NullOption
 
   private def isLegalFunction(context: GoContext, move: GoMove) = {
@@ -120,6 +59,77 @@ object Game {
     }
   }
 
+  private val ai = Exploration(Evaluation)
+
+  private def evaluateOptions(context: GoContext, depth: Int): TreeMap[Long, Set[abstractions.Move[Char, Position]]] = {
+    val tmp = collection.mutable.Map[Long, Set[GoMove]]().withDefaultValue(Set())
+    val legalMoves = context.options.toList
+    val sortedLegalMoves = legalMoves.sortBy(_.data)
+    val n = sortedLegalMoves.size
+    if (n == 1) TreeMap(0L -> legalMoves.toSet)
+    else {
+      var i = 0
+      //      println("==============================================")
+      sortedLegalMoves.foreach { move =>
+        i += 1
+        val key = ai(context.apply(move), depth)
+        //        println(i + "/" + n + " : " + move + " : " + key)
+        tmp.update(key, tmp(key) + move)
+      }
+      val tmap = TreeMap[Long, Set[GoMove]]()(math.Ordering.Long.reverse) ++ tmp
+      tmap
+    }
+  }
+
+  private sealed case class GoMoveSupplier1 extends MoveSupplier[Char, Position] {
+    def apply(context: AbstractContext[Char, _, _, Position]) = {
+      val legalMoves = context.options.toList
+      var move = legalMoves(Random.nextInt(legalMoves.size))
+      while (legalMoves.size > 1 && isNullMove(move)) {
+        move = legalMoves(Random.nextInt(legalMoves.size))
+      }
+      move
+    }
+  }
+
+  private sealed case class GoMoveSupplier2(depth: Int) extends MoveSupplier[Char, Position] {
+    def apply(context: AbstractContext[Char, _, _, Position]) = {
+      val map = evaluateOptions(context.asInstanceOf[GoContext], depth)
+      val (kills, others) = map.partition(_._1 >= Evaluation.Success)
+      if (!kills.isEmpty && kills(kills.firstKey) == Set(Move(context.id, NullOption))) {
+        //        println("I could win just by passing...")
+        val fo = others.filter(e => e._1 > 0 && e._1 < Evaluation.Success)
+        if (!fo.isEmpty) {
+          val tmp = fo(fo.firstKey).head
+          if (ai((context.asInstanceOf[GoContext])(tmp), depth + 2) >= fo.firstKey) {
+            //            println("... but I will play !")
+            fo(fo.firstKey).iterator.next
+          }
+          else map.head._2.iterator.next
+        }
+        else map.head._2.iterator.next
+      }
+      else map.head._2.iterator.next
+    }
+  }
+
+  private sealed case class GoMoveSupplier3 extends MoveSupplier[Char, Position] {
+    def apply(context: AbstractContext[Char, _, _, Position]) = {
+      val legalMoves = context.options.toList
+      val sortedLegalMoves = legalMoves.sortBy(_.data)
+      sortedLegalMoves.head
+    }
+  }
+
+  private val sides = Sides(Adversity('O', 'X'), List(
+    Side('O', 0, GoMoveSupplier2(0)),
+    Side('X', 0, GoMoveSupplier2(2))
+  ))
+
   val context = Context(sides.first, sides, Board(5, 7), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
+
+  def main(args: Array[String]) {
+    Main.main(args)
+  }
 
 }
