@@ -1,7 +1,5 @@
 ------------------------------------
 
-Amélioration du score possible
-
 Evaluation: poser des tests
 	Pour le game over:
 	val debug = Array(

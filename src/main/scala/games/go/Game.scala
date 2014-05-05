@@ -81,6 +81,7 @@ object Game {
     }
   }
 
+  // TODO extract selection mechanism
   private sealed case class GoMoveSupplier1 extends MoveSupplier[Char, Position] {
     def apply(context: AbstractContext[Char, _, _, Position]) = {
       val legalMoves = context.options.toList
@@ -92,7 +93,8 @@ object Game {
     }
   }
 
-  private sealed case class GoMoveSupplier2(depth: Int) extends MoveSupplier[Char, Position] {
+  // TODO extract selection mechanism
+  sealed case class GoMoveSupplier2(depth: Int) extends MoveSupplier[Char, Position] {
     def apply(context: AbstractContext[Char, _, _, Position]) = {
       val map = evaluateOptions(context.asInstanceOf[GoContext], depth)
       val (kills, others) = map.partition(_._1 >= Evaluation.Success)
@@ -113,6 +115,7 @@ object Game {
     }
   }
 
+  // TODO extract selection mechanism
   private sealed case class GoMoveSupplier3 extends MoveSupplier[Char, Position] {
     def apply(context: AbstractContext[Char, _, _, Position]) = {
       val legalMoves = context.options.toList
@@ -122,11 +125,11 @@ object Game {
   }
 
   private val sides = Sides(Adversity('O', 'X'), List(
-    Side('O', 0, GoMoveSupplier2(0)),
-    Side('X', 0, GoMoveSupplier2(2))
+    Side('O', 0, GoMoveSupplier2(2)),
+    Side('X', 0, GoMoveSupplier2(0))
   ))
 
-  val context = Context(sides.first, sides, Board(5, 7), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
+  val context = Context(sides.first, sides, Board(5, 5), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
 
   def main(args: Array[String]) {
     Main.main(args)

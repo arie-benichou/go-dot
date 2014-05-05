@@ -8,9 +8,7 @@ import org.scalatra.json.JacksonJsonSupport
 import components.Positions.Position
 import games.go.Game
 import games.go.Game._
-/*
 import GoContextContainer._
-
 
 object GoContextContainer {
 
@@ -18,11 +16,11 @@ object GoContextContainer {
     val side = incomingMove.head
     val tail = incomingMove.tail
     val position =
-      if (tail.isEmpty) Game.NullOption else {
+      if (tail == "pass") Game.NullOption else {
         val data = tail.split(':').map(Integer.parseInt)
         Position(data(0), data(1))
       }
-    MyGoMove(side, position)
+    Move(side, position)
   }
 
   private def moveToString(move: GoMove) = if (move == null) "" else move.side.toString().charAt(0) + move.data.row + ":" + move.data.column
@@ -42,7 +40,7 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
     contentType = formats("json")
   }
 
-  var context = Game.context
+  var context: GoContext = Game.context
 
   get("/go/context") {
     val ctx = context
@@ -51,15 +49,17 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
       "is-over" -> ctx.isTerminal.toString,
       "space" -> ctx.space.asArrayOfString,
       "last-move" -> moveToString(ctx.lastMove),
-      "options" -> (if (ctx.isTerminal) Set() else ctx.space.layer(ctx.id).options.map(p => p.row + ":" + p.column))
+      "options" -> (if (ctx.isTerminal) Set() else ctx.space.layer(ctx.id).options.map(p => p.row + ":" + p.column)),
+      "lands" -> ctx.space.layer(ctx.id).lands
     //,"scores" -> ctx.sides.map(e => (e._1.toString, Game.score(ctx, e._1))).toMap
     )
   }
 
   get("/go/play/:move") {
     try {
+      val ctx = context
       val move = parseIncomingMove(params("move"))
-      this.synchronized { context = context(move) }
+      this.synchronized { context = ctx.apply(move) }
     }
     catch {
       case e: Exception => {
@@ -83,8 +83,9 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
   get("/go/ai") {
     val ctx = context;
     try {
-      val move = null //chooseMove(ctx)
-      this.synchronized { context = context(move) }
+      if (!ctx.isTerminal) {
+        this.synchronized { context = ctx(ctx.sideToPlay.strategy.apply(ctx)) }
+      }
     }
     catch {
       case e: Exception => {
@@ -108,10 +109,7 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
   get("/go/undo") {
     val ctx = context;
     try {
-      if (!ctx.history.isEmpty) this.synchronized {
-        //context = ctx.history.head
-        null
-      }
+      if (!ctx.history.isEmpty) this.synchronized { context = ctx.history.head }
     }
     catch {
       case e: Exception => {
@@ -133,4 +131,3 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
   }
 
 }
-  */ 

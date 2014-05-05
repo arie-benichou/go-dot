@@ -6,7 +6,7 @@ class ScalatraBootstrap extends LifeCycle {
 
   override def init(context: ServletContext) {
     //context.mount(new BlokusContextContainer(), "/*")
-    //context.mount(new GoContextContainer(), "/*")
+    context.mount(new GoContextContainer(), "/*")
   }
 
 }

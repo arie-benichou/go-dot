@@ -9,9 +9,6 @@ angular.module('myApp.controllers', [])
     ])
 	.controller('Go', ['Go', 
         function(game) {
-			game.populate();
-			game.registerEvents();
-			game.refresh();
 		}
     ])    
     .controller('Rendering', ['$location', 'Blokus',
