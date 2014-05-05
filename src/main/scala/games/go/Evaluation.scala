@@ -43,8 +43,4 @@ object Evaluation extends AbstractEvaluation[GoContext] {
     else estimation
   }
 
-  def main(args: Array[String]) {
-    Main.main(args)
-  }
-
 }

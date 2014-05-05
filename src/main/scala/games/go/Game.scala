@@ -122,8 +122,4 @@ object Game {
 
   val context = Context(sides.first, sides, Board(5, 7), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
 
-  def main(args: Array[String]) {
-    Main.main(args)
-  }
-
 }
