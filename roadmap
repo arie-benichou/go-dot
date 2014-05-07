@@ -1,4 +1,5 @@
 ------------------------------------
+tests
 
 Evaluation: poser des tests
 	Pour le game over:
@@ -7,12 +8,11 @@ Evaluation: poser des tests
 	    "OOO",
 	    "OX."
 	  )
-
 Ordonner les options !
-
 Filtrer les options ?
 
-web ui refactoring
+
+angular js
 
 clustering
 

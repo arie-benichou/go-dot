@@ -105,9 +105,9 @@ Go.Game.prototype = {
 	},
 
 	handleSubmit : function(event) {
+		$("td").html("")
 		var target = $(event.target).attr("id");
 		var move = this.ctx.side + target.substr(1).split("c").join(":");
-		console.debug(move);
 		$.ajax({
 			url : "/go/play/" + move,
 			method : "get",
@@ -119,6 +119,7 @@ Go.Game.prototype = {
 	},
 
 	handleAI : function(event) {
+		$("td").html("")
 		$.ajax({
 			url : "/go/ai",
 			method : "get",
