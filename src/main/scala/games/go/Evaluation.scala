@@ -13,7 +13,7 @@ object Evaluation extends AbstractEvaluation[GoContext] {
 
   private def lands(context: GoContext, side: Char) =
     //context.space.layer(side).territory.closedPositions.size
-    context.space.layer(side).territory.notCapturableYet.size
+    context.space.layer(side).territory.locked.size
 
   private def freedom(context: GoContext, side: Char): Long = {
     val s = context.space.layer(side).strings
