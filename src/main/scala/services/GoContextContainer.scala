@@ -109,25 +109,13 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
 
   get("/go/undo") {
     val ctx = context;
-    try {
-      if (!ctx.history.isEmpty) this.synchronized { context = ctx.history.head }
-    }
-    catch {
-      case e: Exception => {
-        val path = pathToString(ctx)
-        println
-        println("################################ Illegal Instruction ################################")
-        println
-        println("query              : " + params("move"))
-        println("side to play       : " + ctx.id)
-        println("message            : " + e)
-        println
-        println(ctx.space)
-        println("#####################################################################################")
-        println
-        //println("http://localhost:8080/angular-seed-master/app/#/rendering?data=" + path)
-      }
-    }
+    if (!ctx.history.isEmpty) this.synchronized { context = ctx.history.head }
+    redirect("/go/context")
+  }
+
+  get("/go/reset") {
+    val ctx = context;
+    this.synchronized { context = Game.context }
     redirect("/go/context")
   }
 

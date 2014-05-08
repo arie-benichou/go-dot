@@ -145,11 +145,11 @@ object Game {
   }
 
   private val sides = Sides(Adversity('O', 'X'), List(
-    Side('O', 0, GoMoveSupplier2(3)),
-    Side('X', 0, GoMoveSupplier2(0))
+    Side('O', 0, GoMoveSupplier2(2)),
+    Side('X', 0, GoMoveSupplier1())
   ))
 
-  val context = Context(sides.first, sides, Board(5, 7), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
+  val context = Context(sides.first, sides, Board(7, 7), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
 
   def main(args: Array[String]) {
     Main.main(args)

@@ -1,5 +1,6 @@
+web-ui: pouvoir configurer la partie
+
 ------------------------------------
-tests
 
 Evaluation: poser des tests
 	Pour le game over:
@@ -9,8 +10,6 @@ Evaluation: poser des tests
 	    "OX."
 	  )
 Ordonner les options !
-Filtrer les options ?
-
 
 angular js
 

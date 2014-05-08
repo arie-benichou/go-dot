@@ -26,6 +26,7 @@ Go.Game.prototype = {
 		$("#undo").bind("click", this.handleUndo.bind(this));
 		$("#territory").bind("click", this.handleTerritory.bind(this));
 		$("#options").bind("click", this.handleOptions.bind(this));
+		$("#reset").bind("click", this.handleReset.bind(this));
 
 	},
 
@@ -150,5 +151,16 @@ Go.Game.prototype = {
 			this.renderBoard(this.ctx);
 			this.renderOptions(this.ctx);
 	},
+	
+	handleReset : function(event) {
+		$.ajax({
+			url : "/go/reset",
+			method : "get",
+			success : this.update.bind(this),
+			error : function() {
+				alert("error");
+			}
+		});
+	}
 
 };
