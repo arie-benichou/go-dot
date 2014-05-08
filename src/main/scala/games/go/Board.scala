@@ -77,35 +77,59 @@ object Board {
     def apply(board: Board, character: Char) = computeChains(board.cells, character)
   }
 
-  // TODO ? extract Lands Class: (extendes lands, locked positions)
-  private object Lands {
-    def apply(board: Board, character: Char): Set[Position] = {
-      val stringsForSpace = board.layer(Space).strings
-      val opponentOuts = board.layer(opponent(character)).strings.flatMap(_.out)
-      val lands = stringsForSpace.filter(s => s.in.intersect(opponentOuts).isEmpty).flatMap(_.in)
-      if (lands.size == board.rows * board.columns) Set.empty else lands
+  private object Territory {
+
+    private def islands(board: Board, character: Char) = {
+      val outsForOpponent = board.layer(opponent(character)).strings.flatMap(_.out)
+      val outsForPlayer = board.layer(character).strings.flatMap(_.out)
+      board.islands -- (outsForOpponent -- outsForPlayer)
     }
+
+    private def capturable(board: Board, character: Char) = {
+      val playerStrings = board.layer(character).strings
+      board.islands(character).foldLeft(Set[Position]()) { (s, p) =>
+        val outs = playerStrings.filter(_.out.contains(p)).flatMap(_.out)
+        if (outs == Set(p)) s + p else s
+      }
+    }
+
+    private def notCapturableYet(board: Board, character: Char) =
+      board.layer(character).territory.islands -- board.layer(character).territory.capturable
+
+    private def locked(board: Board, character: Char) = {
+      board.layer(character).territory.notCapturableYet --
+        (board.layer(opponent(character)).territory.notCapturableYet ++ board.layer(opponent(character)).territory.capturable)
+    }
+
+    //    private def closedPositions(board: Board, character: Char) = {
+    //      val stringsForSpace = board.layer(Space).strings
+    //      val opponentOuts = board.layer(opponent(character)).strings.flatMap(_.out)
+    //      val lands = stringsForSpace.filter(s => s.in.intersect(opponentOuts).isEmpty).flatMap(_.in)
+    //      if (lands.size == board.rows * board.columns) Set[Position]() else lands
+    //    }
+
+  }
+
+  sealed case class Territory(board: Board, character: Char) {
+    lazy val islands: Set[Position] = Territory.islands(board, character)
+    //lazy val suicides: Set[Position] = Territory.suicides(board, character)
+    lazy val capturable: Set[Position] = Territory.capturable(board, character)
+    lazy val notCapturableYet: Set[Position] = Territory.notCapturableYet(board, character)
+    lazy val locked: Set[Position] = Territory.locked(board, character)
+    //lazy val closedPositions: Set[Position] = Territory.closedPositions(board, character)
   }
 
   private object Options {
-    def apply(board: Board, character: Char) = {
-      val stringsForSpace = board.layer(Space).strings
-      val islands = stringsForSpace.filter(_.out.size < 1).flatMap(_.in)
-      val stringsForPlayer = board.layer(character).strings.map(_.out)
-      val tmp1 = stringsForPlayer.filter(_.size < 2).flatten
-      val tmp2 = tmp1.filter(e => islands.contains(e))
-      val suicides = tmp2.filter(e => !stringsForPlayer.exists(s => s.contains(e) && s.size > 1))
-      val stringsForOpponent = board.layer(opponent(character)).strings
-      val captures = stringsForOpponent.filter(_.out.size == 1).flatMap(_.out)
-      val effectiveIslands = islands.diff(captures).filterNot(p => stringsForPlayer.exists(_.contains(p)))
-      Set() ++ board.spaces -- effectiveIslands -- suicides ++ captures
-    }
+    def apply(board: Board, character: Char) =
+      board.spaces --
+        (board.capturable(character) ++ board.locked(opponent(character))) ++
+        board.capturable(opponent(character))
   }
 
   object Layers {
     sealed case class Layer(character: Char, board: Board) {
       lazy val strings = Chains(this.board, this.character)
-      lazy val lands = Lands(this.board, this.character)
+      lazy val territory = Territory(this.board, this.character)
       lazy val options = Options(this.board, this.character)
     }
     def apply(board: Board) = Map(Black -> Layer(Black, board), White -> Layer(White, board), Space -> Layer(Space, board))
@@ -145,9 +169,14 @@ object Board {
 }
 
 sealed case class Board(cells: Cells[Char], rows: Int, columns: Int)(val captured: Int) {
-  lazy val spaces = this.cells.filterDefaults()
-  private lazy val layers: Map[Char, Layer] = Layers(this)
+  private lazy val spaces = this.cells.filterDefaults()
+  lazy val islands = this.layer(Space).strings.filter(_.out.isEmpty).flatMap(_.in)
+  private val layers: Map[Char, Layer] = Layers(this)
   def layer(character: Char) = this.layers(character)
+  def islands(character: Char) = this.layers(character).territory.islands
+  def capturable(character: Char) = this.layers(character).territory.capturable
+  def notCapturableYet(character: Char) = this.layers(character).territory.notCapturableYet
+  def locked(character: Char) = this.layers(character).territory.locked
   lazy val asArrayOfString = ToString(this.cells)
   override def toString = ToString(this.asArrayOfString)
   def play(position: Position, character: Char) = {

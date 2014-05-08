@@ -50,7 +50,8 @@ class GoContextContainer extends GameContextContainer with JacksonJsonSupport wi
       "space" -> ctx.space.asArrayOfString,
       "last-move" -> moveToString(ctx.lastMove),
       "options" -> (if (ctx.isTerminal) Set() else ctx.space.layer(ctx.id).options.map(p => p.row + ":" + p.column)),
-      "lands" -> ctx.space.layer(ctx.id).territory.closedPositions
+      //"lands" -> ctx.space.layer(ctx.id).territory.closedPositions
+      "lands" -> ctx.space.layer(ctx.id).territory.notCapturableYet
     //,"scores" -> ctx.sides.map(e => (e._1.toString, Game.score(ctx, e._1))).toMap
     )
   }

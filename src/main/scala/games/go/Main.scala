@@ -11,8 +11,8 @@ object Main {
     // TODO add score helpers
     val oc = context.sides.side('O').values
     val xc = context.sides.side('X').values
-    val ol = context.space.layer('O').lands.size
-    val xl = context.space.layer('X').lands.size
+    val ol = 0 //context.space.layer('O').territory.closedPositions.size
+    val xl = 0 //context.space.layer('X').territory.closedPositions.size
 
     println("==============================================")
     if (context.history.isEmpty) {

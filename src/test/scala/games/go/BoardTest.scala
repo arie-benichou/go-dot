@@ -490,82 +490,642 @@ class BoardTest extends FunSpec {
     }
   }
 
-  describe("[Board Lands]") {
+  describe("[Board Islands]") {
 
-    it("lands - case 1") {
+    it("should have no island - case 1") {
       val data = Array(
-        "OO.OO",
-        ".OOO.",
-        "OO.OO",
-        "O.O.O",
-        "OO.OO"
-      )
-
-      val board = Board(data)
-      val lands = board.layer('O').lands
-      assert(lands == Set(
-        Position(0, 2),
-        Position(1, 0),
-        Position(1, 4),
-        Position(2, 2),
-        Position(3, 1),
-        Position(3, 3),
-        Position(4, 2)
-      ))
-    }
-
-    it("lands - case 2") {
-      val data = Array(
-        ".OOX.",
-        "OOOX.",
-        "XXX.."
+        ".."
       )
       val board = Board(data)
-      val lands = board.layer('O').lands
-      assert(lands == Set(Position(0, 0)))
+      val islands = board.islands
+      assert(islands === Set())
     }
 
-    it("lands - case 3") {
+    it("should have no island - case 2") {
       val data = Array(
-        ".X",
+        "OO"
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands === Set())
+    }
+
+    it("should have no island - case 3") {
+      val data = Array(
         "XX"
       )
       val board = Board(data)
-      val lands = board.layer('X').lands
-      assert(lands == Set(Position(0, 0)))
+      val islands = board.islands
+      assert(islands === Set())
     }
 
-    it("lands - case 4") {
+    it("should have 1 island - case 1") {
       val data = Array(
-        "..X",
-        "X.X",
+        "O."
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 1)
+      ))
+    }
+
+    it("should have 1 island - case 2") {
+      val data = Array(
+        "X."
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 1)
+      ))
+    }
+
+    it("should have 2 islands - case 1") {
+      val data = Array(
+        "O.",
+        ".X"
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 1),
+        Position(1, 0)
+      ))
+    }
+
+    it("should have 2 islands - case 2") {
+      val data = Array(
+        "X.",
+        ".X"
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 1),
+        Position(1, 0)
+      ))
+    }
+
+    it("should have 2 islands - case 3") {
+      val data = Array(
+        "O.",
+        ".O"
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 1),
+        Position(1, 0)
+      ))
+    }
+
+    it("should have 3 islands - case 1") {
+      val data = Array(
+        ".O.O.",
+        "OOXOO"
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 0),
+        Position(0, 2),
+        Position(0, 4)
+      ))
+    }
+
+    it("should have 5 islands - case 1") {
+      val data = Array(
+        ".X.",
+        "O.O",
+        ".X."
+      )
+      val board = Board(data)
+      val islands = board.islands
+      assert(islands == Set(
+        Position(0, 0),
+        Position(0, 2),
+        Position(1, 1),
+        Position(2, 0),
+        Position(2, 2)
+      ))
+    }
+
+  }
+
+  describe("[Board Layer Islands]") {
+
+    it("should have no island - case 1") {
+      val data = Array(
+        ".."
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set())
+    }
+
+    it("should have no island - case 2") {
+      val data = Array(
+        "OO"
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set())
+    }
+
+    it("should have no island - case 3") {
+      val data = Array(
+        "X.",
+        ".O"
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set(
+        Position(1, 0),
+        Position(0, 1)
+      ))
+    }
+
+    it("should have no island - case 4") {
+      val data = Array(
+        "O.O",
+        ".X."
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set(
+        Position(0, 1),
+        Position(1, 0),
+        Position(1, 2)
+      ))
+    }
+
+    it("should have no island - case 5") {
+      val data = Array(
+        ".X.",
+        "O.O",
+        ".X."
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands == Set(
+        Position(0, 2),
+        Position(0, 0),
+        Position(2, 0),
+        Position(1, 1),
+        Position(2, 2)
+      ))
+    }
+
+    it("should have 1 island - case 1") {
+      val data = Array(
+        "O."
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set(Position(0, 1)))
+    }
+
+    it("should have 1 island - case 2") {
+      val data = Array(
+        ".O.O.",
+        "OOXOO"
+      )
+      val board = Board(data)
+      val islands = board.islands('X')
+      assert(islands === Set(Position(0, 2)))
+    }
+
+    it("should have 2 islands - case 1") {
+      val data = Array(
+        "O.",
+        ".O"
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set(
+        Position(0, 1),
+        Position(1, 0)
+      ))
+    }
+
+    it("should have 2 islands - case 2") {
+      val data = Array(
+        "OOO",
+        ".O."
+      )
+      val board = Board(data)
+      val islands = board.islands('O')
+      assert(islands === Set(
+        Position(1, 0),
+        Position(1, 2)
+      ))
+    }
+
+    it("should have 2 islands - case 3") {
+      val data = Array(
+        "XXO",
+        ".XO",
+        "XXO",
+        "OOO",
         "XX."
       )
       val board = Board(data)
-      val lands = board.layer('X').lands
-      assert(lands == Set(Position(2, 2), Position(1, 1), Position(0, 1), Position(0, 0)))
+      val options = board.islands('X')
+      assert(options == Set(Position(1, 0), Position(4, 2)))
     }
 
-    it("lands - case 5") {
+    it("should have 3 islands - case 1") {
       val data = Array(
-        ".OOX.",
-        "OOOX.",
-        ".OX.."
+        "O.O",
+        ".O."
       )
       val board = Board(data)
-      val lands = board.layer('X').lands
-      assert(lands == Set(Position(0, 4), Position(1, 4), Position(2, 3), Position(2, 4)))
+      val islands = board.islands('O')
+      assert(islands === Set(
+        Position(0, 1),
+        Position(1, 0),
+        Position(1, 2)
+      ))
     }
 
-    it("lands - case 6") {
+    it("should have 5 islands - case 1") {
       val data = Array(
-        "...",
-        "...",
-        "..."
+        ".O.",
+        "O.O",
+        ".O."
       )
       val board = Board(data)
-      val lands = board.layer('O').lands
-      assert(lands == Set())
+      val islands = board.islands('O')
+      assert(islands === Set(
+        Position(0, 0),
+        Position(0, 2),
+        Position(1, 1),
+        Position(2, 0),
+        Position(2, 2)
+      ))
+    }
+
+  }
+
+  describe("[Board Layer Capturable Positions]") {
+
+    it("should have no capturable position - case 1") {
+      val data = Array(
+        ".."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set())
+    }
+
+    it("should have no capturable position - case 2") {
+      val data = Array(
+        ".O",
+        "O."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set())
+    }
+
+    it("should have no capturable position - case 3") {
+      val data = Array(
+        "O.",
+        ".X"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set())
+    }
+
+    it("should have no capturable position - case 4") {
+      val data = Array(
+        ".O.",
+        "O.O",
+        ".O."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set())
+    }
+
+    it("should have no capturable position - case 5") {
+      val data = Array(
+        ".O",
+        "OO",
+        ".O"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set())
+    }
+
+    it("should have no capturable position - case 6") {
+      val data = Array(
+        ".O.O.",
+        "OOXOO"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set())
+    }
+
+    it("should have 1 capturable position - case 1") {
+      val data = Array(
+        "O."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set(Position(0, 1)))
+    }
+
+    it("should have 1 capturable position - case 2") {
+      val data = Array(
+        "OO",
+        "O."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set(Position(1, 1)))
+    }
+
+    it("should have 1 capturable position - case 3") {
+      val data = Array(
+        "XO",
+        "O."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set(Position(1, 1)))
+    }
+
+    it("should have 1 capturable position - case 4") {
+      val data = Array(
+        "OOO",
+        "O.O",
+        "OOO"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable === Set(Position(1, 1)))
+    }
+
+    it("should have 1 capturable positions - case 5") {
+      val data = Array(
+        "XXO",
+        ".XO",
+        "XXO",
+        "OOO",
+        "XX."
+      )
+      val board = Board(data)
+      val options = board.capturable('O')
+      assert(options == Set(Position(4, 2)))
+    }
+
+    it("should have 1 capturable position - case 6") {
+      val data = Array(
+        ".O.O.",
+        "OOXOO"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('X')
+      assert(capturable === Set(Position(0, 2)))
+    }
+
+    it("should have 2 capturable positions - case 1") {
+      val data = Array(
+        "XXO",
+        ".XO",
+        "XXO",
+        "OOO",
+        "XX."
+      )
+      val board = Board(data)
+      val capturable = board.capturable('X')
+      assert(capturable == Set(Position(1, 0), Position(4, 2)))
+    }
+
+    it("should fail 1") {
+      val data = Array(
+        "XXX.",
+        "XXXO",
+        ".XOO",
+        "XO.O"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('X')
+      assert(capturable == Set())
+    }
+
+    it("should fail 2") {
+      val data = Array(
+        "XXX.",
+        "XXXO",
+        ".XOO",
+        "XO.O"
+      )
+      val board = Board(data)
+      val capturable = board.capturable('O')
+      assert(capturable == Set())
+    }
+
+  }
+
+  describe("[Board Layer Not-Capturable-Yet Positions]") {
+
+    it("should have no Not-Capturable-Yet position - case 1") {
+      val data = Array(
+        ".."
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set())
+    }
+
+    it("should have no Not-Capturable-Yet position - case 2") {
+      val data = Array(
+        "O."
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set())
+    }
+
+    it("should have no Not-Capturable-Yet position - case 3") {
+      val data = Array(
+        "O.",
+        ".X"
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set(
+        Position(1, 0),
+        Position(0, 1)
+      ))
+    }
+
+    it("should have 1 Not-Capturable-Yet positions - case 1") {
+      val data = Array(
+        ".O.",
+        ".OO"
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set(
+        Position(0, 2)
+      ))
+    }
+
+    it("should have 1 Not-Capturable-Yet positions - case 2") {
+      val data = Array(
+        ".....",
+        ".OOO.",
+        ".O.O.",
+        ".OOO.",
+        "....."
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set(
+        Position(2, 2)
+      ))
+    }
+
+    it("should have 2 Not-Capturable-Yet positions - case 1") {
+      val data = Array(
+        ".O.",
+        "OOO"
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set(
+        Position(0, 0),
+        Position(0, 2)
+      ))
+    }
+
+    it("should have 2 Not-Capturable-Yet positions - case 2") {
+      val data = Array(
+        "O.",
+        ".O"
+      )
+      val board = Board(data)
+      val notCapturable = board.notCapturableYet('O')
+      assert(notCapturable === Set(
+        Position(0, 1),
+        Position(1, 0)
+      ))
+    }
+
+  }
+
+  describe("[Board Layer Locked Positions]") {
+
+    it("should have no Locked position - case 1") {
+      val data = Array(
+        ".."
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set())
+    }
+
+    it("should have no Locked position position - case 2") {
+      val data = Array(
+        "O."
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set())
+    }
+
+    it("should have no Locked position position - case 3") {
+      val data = Array(
+        "O.",
+        ".X"
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set())
+    }
+
+    it("should have 1 Locked position positions - case 1") {
+      val data = Array(
+        ".O.",
+        ".OO"
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set(
+        Position(0, 2)
+      ))
+    }
+
+    it("should have 1 Locked position positions - case 2") {
+      val data = Array(
+        ".....",
+        ".OOO.",
+        ".O.O.",
+        ".OOO.",
+        "....."
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set(
+        Position(2, 2)
+      ))
+    }
+
+    it("should have 2 Locked position positions - case 1") {
+      val data = Array(
+        ".O.",
+        "OOO"
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set(
+        Position(0, 0),
+        Position(0, 2)
+      ))
+    }
+
+    it("should have 2 Locked position positions - case 2") {
+      val data = Array(
+        "O.",
+        ".O"
+      )
+      val board = Board(data)
+      val locked = board.locked('O')
+      assert(locked === Set(
+        Position(0, 1),
+        Position(1, 0)
+      ))
+    }
+
+    it("should fail 1") {
+      val data = Array(
+        "OOOOOO",
+        "OOO.XO",
+        "O.XXOO",
+        "OOOOOO"
+      )
+      val board = Board(data)
+      val options = board.locked('O')
+      assert(options == Set())
+    }
+
+    it("should fail 2") {
+      val data = Array(
+        "OOOOOO",
+        "OOOX.O",
+        "OX.XOO",
+        "OOOOOO"
+      )
+      val board = Board(data)
+      val options = board.locked('X')
+      assert(options == Set())
     }
 
   }
@@ -639,13 +1199,13 @@ class BoardTest extends FunSpec {
     it("options - case 6") {
       val data = Array(
         "OOOOOO",
-        "OOO.XO",
+        "OOOX.O",
         "O.XXOO",
         "OOOOOO"
       )
       val board = Board(data)
-      val options = board.layer('X').options
-      assert(options == Set(Position(1, 3), Position(2, 1)))
+      val options = board.layer('O').options
+      assert(options == Set(Position(1, 4), Position(2, 1)))
     }
 
     it("options - case 7") {
@@ -658,6 +1218,102 @@ class BoardTest extends FunSpec {
       val options = board.layer('X').options
       assert(options == Set())
     }
+
+    it("options - case 8") {
+      val data = Array(
+        "XXX.",
+        "XXXO",
+        ".XOO",
+        "XO.O"
+      )
+      val board = Board(data)
+      val options = board.layer('O').options
+      assert(options == Set(Position(0, 3), Position(3, 2)))
+    }
+
   }
+
+  /*
+  describe("[Board Territory]") {
+
+    it("lands - case 1") {
+      val data = Array(
+        "OO.OO",
+        ".OOO.",
+        "OO.OO",
+        "O.O.O",
+        "OO.OO"
+      )
+
+      val board = Board(data)
+      val lands = board.layer('O').territory.closedPositions
+      assert(lands == Set(
+        Position(0, 2),
+        Position(1, 0),
+        Position(1, 4),
+        Position(2, 2),
+        Position(3, 1),
+        Position(3, 3),
+        Position(4, 2)
+      ))
+    }
+
+    it("lands - case 2") {
+      val data = Array(
+        ".OOX.",
+        "OOOX.",
+        "XXX.."
+      )
+      val board = Board(data)
+      val lands = board.layer('O').lands
+      assert(lands == Set(Position(0, 0)))
+    }
+
+    it("lands - case 3") {
+      val data = Array(
+        ".X",
+        "XX"
+      )
+      val board = Board(data)
+      val lands = board.layer('X').lands
+      assert(lands == Set(Position(0, 0)))
+    }
+
+    it("lands - case 4") {
+      val data = Array(
+        "..X",
+        "X.X",
+        "XX."
+      )
+      val board = Board(data)
+      val lands = board.layer('X').lands
+      assert(lands == Set(Position(2, 2), Position(1, 1), Position(0, 1), Position(0, 0)))
+    }
+
+    it("lands - case 5") {
+      val data = Array(
+        ".OOX.",
+        "OOOX.",
+        ".OX.."
+      )
+      val board = Board(data)
+      val lands = board.layer('X').lands
+      assert(lands == Set(Position(0, 4), Position(1, 4), Position(2, 3), Position(2, 4)))
+    }
+
+    it("lands - case 6") {
+      val data = Array(
+        "...",
+        "...",
+        "..."
+      )
+      val board = Board(data)
+      val lands = board.layer('O').lands
+      assert(lands == Set())
+    }
+
+  }
+
+  */
 
 }

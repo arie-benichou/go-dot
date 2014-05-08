@@ -2,7 +2,6 @@ package games.go
 
 import scala.collection.immutable.TreeMap
 import scala.util.Random
-
 import abstractions.AbstractContext
 import abstractions.Adversity
 import abstractions.Context
@@ -10,8 +9,7 @@ import abstractions.Exploration
 import abstractions.MoveSupplier
 import abstractions.Side
 import abstractions.Sides
-import components.Positions.Ordering
-import components.Positions.Position
+import components.Positions._
 
 object Game {
 
@@ -49,11 +47,29 @@ object Game {
     }
   }
 
+  private def reduce(context: GoContext) = {
+    val positions = context.space.cells.filterOthers().foldLeft(Set[Position]()) { (s, p) =>
+      s ++ (p * Directions.AllAround).filter(context.space.cells.get(_) == Board.Symbols.Space)
+    }
+    if (positions.isEmpty)
+      Set(Position(context.space.rows / 2, context.space.columns / 2))
+    //else positions -- context.space.layer(context.id).territory.closedPositions
+    else positions //-- context.space.layer(context.id).territory.notCapturableYet
+  }
+
   private def optionsFunction(context: GoContext): Stream[GoMove] = {
+    // TODO renommer en playablePositions
     val optionsFromBoard = context.space.layer(context.id).options
     if (optionsFromBoard.isEmpty) Stream(Move(context.id, Game.NullOption))
     else {
-      val moves: Stream[GoMove] = optionsFromBoard.map(Move(context.id, _)).toStream
+
+      val effectiveOptions =
+        if (optionsFromBoard.size > 9)
+          optionsFromBoard.intersect(reduce(context))
+        else
+          optionsFromBoard
+
+      val moves: Stream[GoMove] = effectiveOptions.map(Move(context.id, _)).toStream
       val filteredMoves = moves.filterNot(move => context.setOfSpaces.contains(context.space.play(move.data, move.side)))
       filteredMoves ++ Stream(Move(context.id, Game.NullOption))
     }
@@ -69,11 +85,11 @@ object Game {
     if (n == 1) TreeMap(0L -> legalMoves.toSet)
     else {
       var i = 0
-      //      println("==============================================")
+      println("==============================================")
       sortedLegalMoves.foreach { move =>
         i += 1
         val key = ai(context.apply(move), depth)
-        //        println(i + "/" + n + " : " + move + " : " + key)
+        println(i + "/" + n + " : " + move + " : " + key)
         tmp.update(key, tmp(key) + move)
       }
       val tmap = TreeMap[Long, Set[GoMove]]()(math.Ordering.Long.reverse) ++ tmp
@@ -103,7 +119,7 @@ object Game {
         val fo = others.filter(e => e._1 > 0 && e._1 < Evaluation.Success)
         if (!fo.isEmpty) {
           val tmp = fo(fo.firstKey).head
-          if (ai((context.asInstanceOf[GoContext])(tmp), depth + 2) >= fo.firstKey) {
+          if (ai((context.asInstanceOf[GoContext])(tmp), depth + 1) >= fo.firstKey) {
             //            println("... but I will play !")
             fo(fo.firstKey).iterator.next
           }
@@ -125,11 +141,11 @@ object Game {
   }
 
   private val sides = Sides(Adversity('O', 'X'), List(
-    Side('O', 0, GoMoveSupplier2(2)),
+    Side('O', 0, GoMoveSupplier2(3)),
     Side('X', 0, GoMoveSupplier2(0))
   ))
 
-  val context = Context(sides.first, sides, Board(5, 5), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
+  val context = Context(sides.first, sides, Board(5, 7), isLegalFunction, isTerminalFunction, applicationFunction, optionsFunction)
 
   def main(args: Array[String]) {
     Main.main(args)
