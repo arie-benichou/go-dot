@@ -5,8 +5,8 @@ import abstractions.AbstractEvaluation
 
 object Evaluation extends AbstractEvaluation[GoContext] {
 
-  val Success = +9999999999991L
-  val Failure = -9999999999991L
+  val Success = +9999999999999L
+  val Failure = -9999999999999L
   val None = -1L
 
   private def captures(context: GoContext, side: Char) = context.side(side).values
