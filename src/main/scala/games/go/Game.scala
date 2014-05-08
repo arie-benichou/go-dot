@@ -47,29 +47,32 @@ object Game {
     }
   }
 
-  private def reduce(context: GoContext) = {
-    val positions = context.space.cells.filterOthers().foldLeft(Set[Position]()) { (s, p) =>
-      s ++ (p * Directions.AllAround).filter(context.space.cells.get(_) == Board.Symbols.Space)
-    }
-    if (positions.isEmpty)
-      Set(Position(context.space.rows / 2, context.space.columns / 2))
-    //else positions -- context.space.layer(context.id).territory.closedPositions
-    else positions //-- context.space.layer(context.id).territory.notCapturableYet
-  }
-
   private def optionsFunction(context: GoContext): Stream[GoMove] = {
     // TODO renommer en playablePositions
     val optionsFromBoard = context.space.layer(context.id).options
     if (optionsFromBoard.isEmpty) Stream(Move(context.id, Game.NullOption))
     else {
+      val moves: Stream[GoMove] = optionsFromBoard.map(Move(context.id, _)).toStream
+      val filteredMoves = moves.filterNot(move => context.setOfSpaces.contains(context.space.play(move.data, move.side)))
+      filteredMoves ++ Stream(Move(context.id, Game.NullOption))
+    }
+  }
 
-      val effectiveOptions =
-        if (optionsFromBoard.size > 9)
-          optionsFromBoard.intersect(reduce(context))
-        else
-          optionsFromBoard
+  private def reduce(context: GoContext) = {
+    val positions = context.space.cells.filterOthers().foldLeft(Set[Position]()) { (s, p) =>
+      s ++ (p * Directions.AllAround).filter(context.space.cells.get(_) == Board.Symbols.Space)
+    }
+    if (positions.isEmpty) Set(Position(context.space.rows / 2, context.space.columns / 2))
+    else positions //-- context.space.layer(context.id).territory.locked
+  }
 
-      val moves: Stream[GoMove] = effectiveOptions.map(Move(context.id, _)).toStream
+  private def optionsFunctionAI(context: GoContext): Stream[GoMove] = {
+    // TODO renommer en playablePositions
+    val optionsFromBoard = context.space.layer(context.id).options
+    if (optionsFromBoard.isEmpty) Stream(Move(context.id, Game.NullOption))
+    else {
+      val reducedOptions = optionsFromBoard.intersect(reduce(context))
+      val moves: Stream[GoMove] = reducedOptions.map(Move(context.id, _)).toStream
       val filteredMoves = moves.filterNot(move => context.setOfSpaces.contains(context.space.play(move.data, move.side)))
       filteredMoves ++ Stream(Move(context.id, Game.NullOption))
     }
@@ -77,9 +80,10 @@ object Game {
 
   private val ai = Exploration(Evaluation)
 
-  private def evaluateOptions(context: GoContext, depth: Int): TreeMap[Long, Set[abstractions.Move[Char, Position]]] = {
+  private def evaluateOptions(context: GoContext, depth: Int, optionsFunctionAI: (GoContext) => Stream[GoMove]): TreeMap[Long, Set[abstractions.Move[Char, Position]]] = {
     val tmp = collection.mutable.Map[Long, Set[GoMove]]().withDefaultValue(Set())
-    val legalMoves = context.options.toList
+    val ctx = context.apply(optionsFunctionAI)
+    val legalMoves = ctx.options.toList
     val sortedLegalMoves = legalMoves.sortBy(_.data)
     val n = sortedLegalMoves.size
     if (n == 1) TreeMap(0L -> legalMoves.toSet)
@@ -88,7 +92,7 @@ object Game {
       println("==============================================")
       sortedLegalMoves.foreach { move =>
         i += 1
-        val key = ai(context.apply(move), depth)
+        val key = ai(ctx.apply(move), depth)
         println(i + "/" + n + " : " + move + " : " + key)
         tmp.update(key, tmp(key) + move)
       }
@@ -112,7 +116,7 @@ object Game {
   // TODO extract selection mechanism
   sealed case class GoMoveSupplier2(depth: Int) extends MoveSupplier[Char, Position] {
     def apply(context: AbstractContext[Char, _, _, Position]) = {
-      val map = evaluateOptions(context.asInstanceOf[GoContext], depth)
+      val map = evaluateOptions(context.asInstanceOf[GoContext], depth, optionsFunctionAI)
       val (kills, others) = map.partition(_._1 >= Evaluation.Success)
       if (!kills.isEmpty && kills(kills.firstKey) == Set(Move(context.id, NullOption))) {
         //        println("I could win just by passing...")
