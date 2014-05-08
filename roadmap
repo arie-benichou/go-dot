@@ -1,3 +1,7 @@
+playablesPositions au lieu de options au niveau du board
+
+------------------------------------
+
 web-ui: pouvoir configurer la partie
 
 ------------------------------------
@@ -9,7 +13,12 @@ Evaluation: poser des tests
 	    "OOO",
 	    "OX."
 	  )
+	  
+------------------------------------
+
 Ordonner les options !
+
+------------------------------------
 
 angular js
 
